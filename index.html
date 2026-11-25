@@ -133,6 +133,26 @@ label.f{display:block;font-size:12px;color:var(--mut);margin:8px 2px 4px}
 .thm button{border-radius:14px;padding:10px 4px;border:2px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800;font-size:13px}
 .thm button.on{border-color:var(--acc);box-shadow:0 0 0 2px var(--acc)}
 .thm .sw{display:flex;gap:3px}.thm .sw i{width:14px;height:14px;border-radius:50%;display:block}
+.hero{max-width:340px;margin:6px auto 12px;background:var(--card);border:1px solid var(--line);border-radius:26px;padding:16px 16px 14px;text-align:center;box-shadow:0 10px 30px -15px color-mix(in srgb,var(--acc) 40%,transparent)}
+.hero .hl{font-size:13px;color:var(--mut);font-weight:700;margin-bottom:6px}
+.donut{position:relative;width:200px;height:200px;margin:0 auto}
+.donut svg{width:100%;height:100%}
+.dBase{fill:none;stroke:color-mix(in srgb,var(--fg) 7%,transparent);stroke-width:24}
+.dSeg{fill:none;stroke-width:24;transition:stroke-dasharray .9s cubic-bezier(.2,.8,.2,1),stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.dc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.dv{font-size:30px;font-weight:900;color:var(--acc);line-height:1.1}
+.du{font-size:12px;color:var(--mut);font-weight:700}.dn{font-size:11px;color:var(--mut);margin-top:2px}
+.leg{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:10px}
+.leg span{display:flex;align-items:center;gap:5px;background:var(--card2);border-radius:10px;padding:4px 9px;font-size:12px;font-weight:700}
+.leg i{width:10px;height:10px;border-radius:3px;display:block}
+.leg small{color:var(--mut);font-weight:600}
+.sum{grid-template-columns:repeat(3,1fr)}
+.addBtn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-radius:18px;background:var(--grad);color:var(--onacc);font-size:17px;font-weight:900;margin-bottom:10px;box-shadow:0 8px 24px -12px var(--acc)}
+.addBtn i{font-style:normal;transition:transform .3s;font-size:20px}
+.addBtn.on i{transform:rotate(180deg)}
+.drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s ease}
+.drop>div{overflow:hidden}
+.drop.on{grid-template-rows:1fr}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('aq_theme')||'lime'}catch(e){}</script>
 </head>
@@ -149,14 +169,22 @@ label.f{display:block;font-size:12px;color:var(--mut);margin:8px 2px 4px}
   <div class="bt" id="updBtns"><button style="background:var(--grad);color:var(--onacc)" id="updNow">حدّث دلوقتي</button><button style="background:color-mix(in srgb,var(--fg) 7%,transparent)" id="updLater">بعدين</button></div>
 </div>
 
+<section class="hero">
+  <div class="hl">💰 دخل الشهر ده · <span id="hMonth"></span></div>
+  <div class="donut">
+    <svg viewBox="0 0 200 200" id="dSvg"><circle cx="100" cy="100" r="78" class="dBase"/><g id="dSegs" transform="rotate(-90 100 100)"></g></svg>
+    <div class="dc"><div class="dv num" id="sMon">0</div><div class="du">جنيه</div><div class="dn" id="sMonN">0 قسط</div></div>
+  </div>
+  <div class="leg" id="sLeg"></div>
+</section>
 <section class="sum">
-  <div class="sc big"><div><div class="l">💰 دخل الشهر ده</div><div class="c" id="sMonC"></div></div><div class="v num" id="sMon">0</div></div>
-  <div class="sc"><div class="l">النهارده</div><div class="v num" id="sDay">0</div></div>
-  <div class="sc"><div class="l">السنة</div><div class="v num" id="sYear">0</div></div>
-  <div class="sc"><div class="l">الكل</div><div class="v num" id="sAll">0</div></div>
+  <div class="sc"><div class="l">☀️ النهارده</div><div class="v num" id="sDay">0</div></div>
+  <div class="sc"><div class="l">📅 السنة</div><div class="v num" id="sYear">0</div></div>
+  <div class="sc"><div class="l">🧮 الكل</div><div class="v num" id="sAll">0</div></div>
 </section>
 
-<!-- ADD -->
+<button class="addBtn" id="addToggle"><span>➕ تسجيل قسط جديد</span><i id="addArr">▾</i></button>
+<div class="drop" id="formDrop"><div>
 <section class="card" id="formCard">
   <h3 id="fTitle">➕ تسجيل قسط</h3>
   <label class="f">👤 اسم العميل</label>
@@ -174,6 +202,7 @@ label.f{display:block;font-size:12px;color:var(--mut);margin:8px 2px 4px}
   <button class="save" id="saveBtn">✅ سجّل القسط</button>
   <button class="cancel" id="cancelEdit">إلغاء التعديل</button>
 </section>
+</div></div>
 
 <!-- TILES -->
 <section class="tiles">
@@ -248,7 +277,7 @@ label.f{display:block;font-size:12px;color:var(--mut);margin:8px 2px 4px}
 <div class="toast" id="toast"></div>
 
 <script>
-const APP_V = 3;
+const APP_V = 4;
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => (Math.round(+n * 100) / 100).toLocaleString('en-US');
@@ -369,7 +398,7 @@ function resetForm() {
   $('#fTitle').textContent = '➕ تسجيل قسط'; $('#saveBtn').textContent = '✅ سجّل القسط'; $('#saveBtn').classList.remove('edit');
   $('#cancelEdit').style.display = 'none'; renderSugs.touched = false; renderSugs();
 }
-$('#cancelEdit').onclick = resetForm;
+$('#cancelEdit').onclick = () => { resetForm(); setDrop(false); };
 $('#saveBtn').onclick = () => {
   const name = $('#fName').value.trim(), amount = +toEn($('#fAmt').value), date = $('#fDate').value || today();
   if (!name) { toast('✍️ اكتب اسم العميل', 1); $('#fName').focus(); return; }
@@ -384,7 +413,7 @@ $('#saveBtn').onclick = () => {
     const t = { id: uid(), name, amount, date, method: m.id, mname: m.name, note: $('#fNote').value.trim(), created: new Date().toISOString() };
     TX.push(t); saveTx(); enqueue({ action: 'save', tx: t }); toast('✅ اتسجل ' + fmt(amount) + ' من ' + name);
   }
-  resetForm(); renderAll();
+  resetForm(); renderAll(); setDrop(false);
 };
 $('#fAmt').addEventListener('keydown', e => { if (e.key === 'Enter') $('#saveBtn').click(); });
 
@@ -393,7 +422,7 @@ function startEdit(id) {
   editId = id; $('#fName').value = t.name; $('#fAmt').value = t.amount; $('#fDate').value = t.date; $('#fNote').value = t.note || '';
   curMethod = t.method; renderSugs.touched = true; renderMethodChips(); renderSugs();
   $('#fTitle').textContent = '✏️ تعديل القسط'; $('#saveBtn').textContent = '💾 احفظ التعديل'; $('#saveBtn').classList.add('edit');
-  $('#cancelEdit').style.display = 'block'; $('#formCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  $('#cancelEdit').style.display = 'block'; setDrop(true); setTimeout(() => $('#addToggle').scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
 }
 function delTx(id) {
   TX = TX.filter(t => t.id !== id); saveTx();
@@ -403,15 +432,36 @@ function delTx(id) {
 
 // ---------- summary ----------
 function renderSum() {
-  const d = today(), m = d.slice(0, 7), y = d.slice(0, 4);
-  const mt = TX.filter(t => t.date.startsWith(m));
+  const d = today(), m = d.slice(0, 7), y = d.slice(0, 4), now = new Date();
+  const mt = TX.filter(t => t.date.startsWith(m)), tot = sum(mt);
+  $('#hMonth').textContent = MONTHS[now.getMonth()] + ' ' + now.getFullYear();
   $('#sDay').textContent = fmt(sum(TX.filter(t => t.date === d)));
-  $('#sMon').textContent = fmt(sum(mt));
+  $('#sMon').textContent = fmt(tot);
+  $('#sMonN').textContent = mt.length + ' قسط';
   $('#sYear').textContent = fmt(sum(TX.filter(t => t.date.startsWith(y))));
   $('#sAll').textContent = fmt(sum(TX));
-  const by = METHODS.map(x => [x, sum(mt.filter(t => t.method === x.id))]).filter(a => a[1] > 0);
-  $('#sMonC').innerHTML = by.length ? by.map(([x, v]) => `${x.emoji} <span class="num">${fmt(v)}</span>`).join(' · ') : mt.length + ' قسط';
+  const g = {}; mt.forEach(t => { const x = methOf(t); (g[x.id] ||= { x, v: 0 }).v += +t.amount; });
+  const by = Object.values(g).sort((a, b) => b.v - a.v);
+  // donut
+  const C = 2 * Math.PI * 78, gap = by.length > 1 ? 3 : 0, segs = $('#dSegs');
+  const have = new Map([...segs.children].map(c => [c.dataset.id, c]));
+  let off = 0;
+  by.forEach(({ x, v }) => {
+    const len = Math.max(0, v / tot * C - gap);
+    let c = have.get(x.id);
+    if (!c) { c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', 100); c.setAttribute('cy', 100); c.setAttribute('r', 78); c.setAttribute('class', 'dSeg'); c.dataset.id = x.id;
+      c.style.strokeDasharray = '0 ' + C; c.style.strokeDashoffset = -off; segs.appendChild(c); c.getBoundingClientRect(); }
+    have.delete(x.id); c.style.stroke = x.color;
+    c.style.strokeDasharray = len + ' ' + (C - len); c.style.strokeDashoffset = -off; off += v / tot * C;
+  });
+  have.forEach(c => { c.style.strokeDasharray = '0 ' + C; setTimeout(() => c.remove(), 900); });
+  $('#sLeg').innerHTML = by.length ? by.map(({ x, v }) => `<span><i style="background:${x.color}"></i>${esc(x.name)} <b class="num">${fmt(v)}</b><small>${Math.round(v / tot * 100)}%</small></span>`).join('')
+    : '<span><small>سجّل أول قسط والدايرة هتبدأ تتلوّن 🎨</small></span>';
 }
+
+// ---------- add curtain ----------
+function setDrop(on) { $('#formDrop').classList.toggle('on', on); $('#addToggle').classList.toggle('on', on); if (on) setTimeout(() => $('#fName').focus({ preventScroll: true }), 350); }
+$('#addToggle').onclick = () => { const on = !$('#formDrop').classList.contains('on'); if (!on && editId) resetForm(); setDrop(on); };
 
 // ---------- tiles ----------
 function openCur(id) {
