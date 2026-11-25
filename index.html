@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050f08">
+<title>أقساطي 💸</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050f08;--card:#0c1c12;--card2:#112818;--line:#1d3a25;--txt:#e8f5e9;--mut:#8fae97;--acc:#a3e635;--grad:linear-gradient(135deg,#ecfccb,#a3e635 50%,#4d7c0f);--onacc:#0a1a0e;--red:#fb7185;--warn:#fbbf24}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:Cairo,system-ui,sans-serif}
+body{padding:0 14px calc(40px + env(safe-area-inset-bottom));max-width:620px;margin:auto;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:-20% -20% auto;height:60vh;background:radial-gradient(50% 50% at 70% 30%,rgba(163,230,53,.12),transparent 70%);pointer-events:none;z-index:-1}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;display:inline-block}
+header{display:flex;align-items:center;gap:8px;padding:calc(12px + env(safe-area-inset-top)) 0 10px;position:sticky;top:0;background:linear-gradient(var(--bg) 75%,transparent);z-index:20}
+.logo{flex:1;display:flex;align-items:center;gap:8px;font-size:20px;font-weight:900}
+.logo .lg{font-size:24px}
+.sync{font-size:11px;color:var(--mut);display:flex;align-items:center;gap:5px}
+.sync i{width:8px;height:8px;border-radius:50%;background:#64748b;display:inline-block}
+.sync i.ok{background:var(--acc);box-shadow:0 0 8px var(--acc)}.sync i.wait{background:var(--warn)}.sync i.err{background:var(--red)}
+.hbtn{position:relative;width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:18px;display:grid;place-items:center}
+.badge{position:absolute;top:-4px;left:-4px;min-width:16px;height:16px;border-radius:4px;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center}
+.upd{display:none;background:var(--card);border:1px solid var(--acc);border-radius:16px;padding:12px 14px;margin:6px 0 12px}
+.upd.on{display:block}.upd h4{margin:0 0 6px}.upd ul{margin:0 0 10px;padding-inline-start:18px;font-size:14px}
+.upd .bt{display:flex;gap:8px}.upd .bt button{flex:1;padding:10px;border-radius:12px;font-weight:800}
+
+/* summary */
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 14px}
+.sc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 8px;text-align:center}
+.sc .l{font-size:12px;color:var(--mut)}.sc .v{font-size:19px;font-weight:900;color:var(--acc)}.sc .c{font-size:11px;color:var(--mut)}
+.sc.big{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;text-align:start;padding:12px 14px}
+.sc.big .v{font-size:26px}
+
+/* card / form */
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center;gap:6px}
+.card h3 .x{margin-inline-start:auto;font-size:12px;color:var(--mut);font-weight:600}
+label.f{display:block;font-size:12px;color:var(--mut);margin:8px 2px 4px}
+.inp{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 12px;font-size:16px;outline:none}
+.inp:focus{border-color:var(--acc)}
+.amt{font-size:28px;font-weight:900;text-align:center;color:var(--acc);direction:ltr}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.quick button{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:4px 10px;font-size:13px;font-weight:700}
+.meths{display:flex;flex-wrap:wrap;gap:8px}
+.mchip{display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:14px;background:var(--card2);border:2px solid var(--line);font-weight:800;font-size:14px}
+.mchip.on{border-color:var(--mc);background:color-mix(in srgb,var(--mc) 18%,transparent)}
+.mchip.add{border-style:dashed;color:var(--mut)}
+.sugs{display:flex;gap:6px;overflow-x:auto;margin-top:6px;scrollbar-width:none}
+.sugs button{flex:none;background:rgba(163,230,53,.1);border:1px solid rgba(163,230,53,.3);border-radius:10px;padding:4px 10px;font-size:13px}
+.save{width:100%;margin-top:14px;padding:14px;border-radius:16px;background:var(--grad);color:var(--onacc);font-size:17px;font-weight:900}
+.save.edit{background:linear-gradient(135deg,#fde68a,#f59e0b)}
+.cancel{width:100%;margin-top:6px;padding:9px;border-radius:12px;background:rgba(255,255,255,.06);font-weight:700;display:none}
+.toast{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(120px);background:var(--acc);color:var(--onacc);padding:10px 18px;border-radius:14px;font-weight:800;transition:.3s;z-index:99;max-width:90vw;text-align:center}
+.toast.on{transform:translateX(-50%) translateY(0)}.toast.err{background:var(--red);color:#fff}
+
+/* tiles + curtains */
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:4px;font-weight:800}
+.tile .e{font-size:30px}.tile small{font-weight:600;color:var(--mut);font-size:11px}
+.tile.on{border-color:var(--acc);background:rgba(163,230,53,.08)}
+.cur{display:none}.cur.on{display:block;animation:dn .25s ease}
+@keyframes dn{from{opacity:0;transform:translateY(-8px)}}
+
+/* report */
+.seg{display:flex;background:var(--card2);border-radius:12px;padding:3px;margin-bottom:10px}
+.seg button{flex:1;padding:8px;border-radius:10px;font-weight:800;color:var(--mut)}
+.seg button.on{background:var(--acc);color:var(--onacc)}
+.pnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.pnav button{width:38px;height:38px;border-radius:12px;background:var(--card2);font-size:20px;font-weight:900}
+.pnav b{font-size:16px}
+.tot{text-align:center;margin:4px 0 12px}.tot .v{font-size:32px;font-weight:900;color:var(--acc)}.tot .c{font-size:12px;color:var(--mut)}
+.bar{margin:8px 0}
+.bar .t{display:flex;justify-content:space-between;font-size:14px;font-weight:700;margin-bottom:4px}
+.bar .t span:last-child{color:var(--mut);font-weight:600}
+.bar .tr{height:12px;border-radius:8px;background:rgba(255,255,255,.06);overflow:hidden}
+.bar .tr i{display:block;height:100%;border-radius:8px;transition:width .6s}
+.sub{font-size:13px;color:var(--mut);margin:14px 0 6px;font-weight:700}
+
+/* lists */
+.it{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--line)}
+.it:last-child{border:0}
+.it .dot{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;flex:none}
+.it .m{flex:1;min-width:0}.it .m b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .m small{color:var(--mut);font-size:12px}
+.it .a{font-weight:900;color:var(--acc);font-size:16px}
+.it .ac{display:flex;gap:4px}
+.it .ac button{width:32px;height:32px;border-radius:10px;background:var(--card2);font-size:14px}
+.it .ac button.sure{background:var(--red);width:auto;padding:0 8px;font-size:12px;font-weight:800;color:#fff}
+.empty{text-align:center;color:var(--mut);padding:20px 0;font-size:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chips button{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:5px 11px;font-size:13px;font-weight:700}
+.chips button.on{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.range{display:none;gap:8px;margin-bottom:8px}.range.on{display:grid;grid-template-columns:1fr 1fr}
+.cust{cursor:pointer}
+.cdet{display:none;background:var(--card2);border-radius:12px;padding:4px 10px;margin:-2px 0 8px}.cdet.on{display:block}
+.cdet .it{padding:7px 0}
+.emo{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.emo button{width:38px;height:38px;border-radius:10px;background:var(--card2);border:2px solid transparent;font-size:18px}
+.emo button.on{border-color:var(--acc)}
+.cols button{border-radius:50%;width:30px;height:30px}
+.cols button.on{border-color:#fff}
+.btn2{padding:10px 14px;border-radius:12px;background:var(--card2);border:1px solid var(--line);font-weight:800}
+.btn2.pri{background:var(--acc);color:var(--onacc);border:0}
+.hint{font-size:12px;color:var(--mut);line-height:1.8}
+.msg{font-size:13px;margin-top:8px;min-height:18px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><span class="lg">💸</span><b>أقساطي</b></div>
+  <div class="sync"><i id="syncDot"></i><span id="syncTxt">محلي</span></div>
+  <button class="hbtn" id="updBtn" title="تحديث">⟳<span class="badge" id="updBadge">1</span></button>
+</header>
+
+<div class="upd" id="updCard">
+  <h4 id="updTitle">🆕 الجديد في التحديث</h4>
+  <ul id="updNotes"></ul>
+  <div class="bt" id="updBtns"><button style="background:var(--grad);color:var(--onacc)" id="updNow">حدّث دلوقتي</button><button style="background:rgba(255,255,255,.07)" id="updLater">بعدين</button></div>
+</div>
+
+<section class="sum">
+  <div class="sc big"><div><div class="l">💰 دخل الشهر ده</div><div class="c" id="sMonC"></div></div><div class="v num" id="sMon">0</div></div>
+  <div class="sc"><div class="l">النهارده</div><div class="v num" id="sDay">0</div></div>
+  <div class="sc"><div class="l">السنة</div><div class="v num" id="sYear">0</div></div>
+  <div class="sc"><div class="l">الكل</div><div class="v num" id="sAll">0</div></div>
+</section>
+
+<!-- ADD -->
+<section class="card" id="formCard">
+  <h3 id="fTitle">➕ تسجيل قسط</h3>
+  <label class="f">👤 اسم العميل</label>
+  <input class="inp" id="fName" placeholder="اكتب الاسم" autocomplete="off">
+  <div class="sugs" id="nameSugs"></div>
+  <label class="f">💵 المبلغ (جنيه)</label>
+  <input class="inp amt" id="fAmt" inputmode="decimal" placeholder="0">
+  <div class="quick" id="lastAmts"></div>
+  <label class="f">💳 طريقة الدفع</label>
+  <div class="meths" id="fMeths"></div>
+  <div class="row2">
+    <div><label class="f">📅 التاريخ</label><input class="inp" type="date" id="fDate"></div>
+    <div><label class="f">📝 ملاحظة</label><input class="inp" id="fNote" placeholder="اختياري"></div>
+  </div>
+  <button class="save" id="saveBtn">✅ سجّل القسط</button>
+  <button class="cancel" id="cancelEdit">إلغاء التعديل</button>
+</section>
+
+<!-- TILES -->
+<section class="tiles">
+  <button class="tile" data-c="cRep"><span class="e">📊</span>التقارير<small>يوم · شهر · سنة</small></button>
+  <button class="tile" data-c="cLog"><span class="e">📋</span>السجل<small>بحث وتعديل</small></button>
+  <button class="tile" data-c="cCus"><span class="e">👥</span>العملاء<small>دفع كل عميل</small></button>
+  <button class="tile" data-c="cMet"><span class="e">💳</span>طرق الدفع<small>إضافة طريقة جديدة</small></button>
+  <button class="tile" data-c="cSet" style="grid-column:1/-1;flex-direction:row;justify-content:center;gap:8px;padding:10px"><span class="e" style="font-size:20px">⚙️</span>الإعدادات والربط بالشيت</button>
+</section>
+
+<!-- REPORT -->
+<section class="card cur" id="cRep">
+  <h3>📊 التقارير</h3>
+  <div class="seg" id="rMode"><button data-m="d">يوم</button><button data-m="m" class="on">شهر</button><button data-m="y">سنة</button></div>
+  <div class="pnav"><button id="rPrev">›</button><b id="rLbl"></b><button id="rNext">‹</button></div>
+  <div class="tot"><div class="v num" id="rTot">0</div><div class="c" id="rCnt"></div></div>
+  <div class="sub">💳 حسب طريقة الدفع</div>
+  <div id="rMeth"></div>
+  <div class="sub" id="rBrkT">📆 حسب الشهور</div>
+  <div id="rBrk"></div>
+  <div class="sub">👥 أكتر العملاء دفعًا</div>
+  <div id="rCus"></div>
+</section>
+
+<!-- LOG -->
+<section class="card cur" id="cLog">
+  <h3>📋 السجل <span class="x" id="lCnt"></span></h3>
+  <input class="inp" id="lQ" placeholder="🔎 دوّر بالاسم أو المبلغ أو الملاحظة">
+  <div class="chips" id="lDates"><button data-r="all" class="on">الكل</button><button data-r="today">النهارده</button><button data-r="7">آخر ٧ أيام</button><button data-r="month">الشهر ده</button><button data-r="last">الشهر اللي فات</button><button data-r="custom">📅 من/إلى</button></div>
+  <div class="range" id="lRange"><input class="inp" type="date" id="lFrom"><input class="inp" type="date" id="lTo"></div>
+  <div class="chips" id="lMeths"></div>
+  <div id="lSum" class="sub" style="margin-top:4px"></div>
+  <div id="lList"></div>
+</section>
+
+<!-- CUSTOMERS -->
+<section class="card cur" id="cCus">
+  <h3>👥 العملاء <span class="x" id="cCnt"></span></h3>
+  <input class="inp" id="cQ" placeholder="🔎 دوّر على عميل">
+  <div id="cList" style="margin-top:6px"></div>
+</section>
+
+<!-- METHODS -->
+<section class="card cur" id="cMet">
+  <h3>💳 طرق الدفع</h3>
+  <div id="mList"></div>
+  <div class="sub">➕ إضافة طريقة جديدة</div>
+  <input class="inp" id="mName" placeholder="مثلاً: تحويل بنكي، أورانج كاش، فوري">
+  <label class="f">الأيقونة</label>
+  <div class="emo" id="mEmo"></div>
+  <label class="f">اللون</label>
+  <div class="emo cols" id="mCol"></div>
+  <button class="save" id="mAdd" style="margin-top:12px">➕ ضيف الطريقة</button>
+</section>
+
+<!-- SETTINGS -->
+<section class="card cur" id="cSet">
+  <h3>⚙️ الربط بشيت جوجل</h3>
+  <label class="f">رابط كود الشيت (آخره /exec)</label>
+  <input class="inp" id="sUrl" placeholder="https://script.google.com/macros/s/.../exec" style="direction:ltr;font-size:13px">
+  <label class="f">كلمة السر (Token)</label>
+  <input class="inp" id="sTok" style="direction:ltr" placeholder="ihab-aqsati">
+  <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+    <button class="btn2 pri" id="sSave">💾 احفظ وجرّب</button>
+    <button class="btn2" id="sPull">⬇️ هات البيانات من الشيت</button>
+    <button class="btn2" id="sPush">⬆️ ارفع كل اللي على الموبايل</button>
+  </div>
+  <div class="msg" id="sMsg"></div>
+  <p class="hint">من غير ربط، البيانات بتتحفظ على الموبايل بس.<br>بعد الربط، كل قسط بيتسجل في الشيت، ولو النت فاصل بيستنى ويترفع لوحده.</p>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const APP_V = 1;
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => (Math.round(+n * 100) / 100).toLocaleString('en-US');
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const today = () => ymd(new Date());
+const MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const DAYS = ['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'];
+const toEn = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[٫,]/g, '.');
+
+const DEF_METHODS = [
+  { id: 'cash', name: 'كاش', emoji: '💵', color: '#4ade80' },
+  { id: 'vf', name: 'فودافون كاش', emoji: '🔴', color: '#ef4444' },
+  { id: 'insta', name: 'إنستاباي', emoji: '🟣', color: '#a855f7' }
+];
+const EMOJIS = ['🏦','🟠','🟡','🔵','🟢','⚫','💳','📱','🧾','💰','🪙','✉️'];
+const COLORS = ['#f97316','#eab308','#3b82f6','#06b6d4','#22c55e','#ec4899','#94a3b8','#f43f5e'];
+
+// ---------- state ----------
+const LS = { tx: 'aq_tx', m: 'aq_methods', q: 'aq_queue', cfg: 'aq_cfg' };
+const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch (e) { return d; } };
+const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+let TX = load(LS.tx, []), METHODS = load(LS.m, null) || DEF_METHODS.slice(), QUEUE = load(LS.q, []), CFG = load(LS.cfg, { url: '', token: 'ihab-aqsati' });
+let curMethod = METHODS[0]?.id, editId = null;
+const saveTx = () => store(LS.tx, TX);
+const mById = id => METHODS.find(m => m.id === id) || { id, name: id, emoji: '💳', color: '#94a3b8' };
+const methOf = t => METHODS.find(m => m.id === t.method) || { id: t.method, name: t.mname || t.method, emoji: '💳', color: '#94a3b8' };
+const sum = a => a.reduce((s, t) => s + +t.amount, 0);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+function toast(t, err) { const e = $('#toast'); e.textContent = t; e.className = 'toast on' + (err ? ' err' : ''); clearTimeout(toast.t); toast.t = setTimeout(() => e.className = 'toast', 2200); }
+
+// ---------- sync ----------
+function setSync(st, txt) { $('#syncDot').className = st; $('#syncTxt').textContent = txt; }
+function errTxt(m) {
+  m = String(m || '');
+  if (m.includes('unknown action')) return '⚠️ كود الشيت لسه قديم — حدّثه وانشره إصدار جديد';
+  if (m.includes('wrong token')) return '⚠️ كلمة السر مش زي اللي في كود الشيت';
+  if (m.includes('Failed to fetch') || m.includes('NetworkError')) return '📡 مفيش نت أو الرابط غلط';
+  return '⚠️ ' + m;
+}
+async function api(body) {
+  if (!CFG.url) throw new Error('no url');
+  const r = await fetch(CFG.url, { method: 'POST', body: JSON.stringify({ token: CFG.token, ...body }) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || 'error');
+  return j;
+}
+function enqueue(op) {
+  if (op.action !== 'setMethods' && op.tx) QUEUE = QUEUE.filter(q => !(q.tx && q.tx.id === op.tx.id && q.action !== 'delete'));
+  if (op.action === 'setMethods') QUEUE = QUEUE.filter(q => q.action !== 'setMethods');
+  QUEUE.push(op); store(LS.q, QUEUE); flush();
+}
+let flushing = false;
+async function flush() {
+  if (!CFG.url) { setSync('', 'محلي'); return; }
+  if (flushing) return;
+  if (!QUEUE.length) { setSync('ok', 'متزامن'); return; }
+  flushing = true; setSync('wait', 'بيرفع ' + QUEUE.length);
+  try {
+    while (QUEUE.length) { await api(QUEUE[0]); QUEUE.shift(); store(LS.q, QUEUE); }
+    setSync('ok', 'متزامن');
+  } catch (e) { setSync('err', navigator.onLine ? 'خطأ' : 'مستني النت'); if (navigator.onLine) console.warn(e); }
+  flushing = false;
+}
+async function pull(silent) {
+  if (!CFG.url) return;
+  try {
+    const j = await api({ action: 'getAll' });
+    const pendingIds = new Set(QUEUE.filter(q => q.tx).map(q => q.tx.id));
+    const delIds = new Set(QUEUE.filter(q => q.action === 'delete').map(q => q.id));
+    const local = TX.filter(t => pendingIds.has(t.id));
+    const remote = (j.tx || []).filter(t => !pendingIds.has(t.id) && !delIds.has(t.id));
+    TX = remote.concat(local); saveTx();
+    if (j.methods && j.methods.length && !QUEUE.some(q => q.action === 'setMethods')) { METHODS = j.methods; store(LS.m, METHODS); }
+    renderAll(); if (!silent) toast('✅ اتجابت ' + TX.length + ' معاملة من الشيت');
+    flush();
+  } catch (e) { if (!silent) toast(errTxt(e.message), 1); setSync('err', 'خطأ'); }
+}
+addEventListener('online', flush);
+
+// ---------- form ----------
+function renderMethodChips() {
+  if (!METHODS.some(m => m.id === curMethod)) curMethod = METHODS[0]?.id;
+  $('#fMeths').innerHTML = METHODS.map(m => `<button class="mchip ${m.id === curMethod ? 'on' : ''}" style="--mc:${m.color}" data-id="${esc(m.id)}">${m.emoji} ${esc(m.name)}</button>`).join('') +
+    `<button class="mchip add" id="goAddM">➕ طريقة جديدة</button>`;
+}
+$('#fMeths').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'goAddM') { openCur('cMet'); $('#mName').focus(); return; }
+  curMethod = b.dataset.id; renderMethodChips();
+};
+function names() {
+  const m = new Map();
+  TX.forEach(t => { const k = t.name.trim(); const o = m.get(k) || { n: k, c: 0, last: '' }; o.c++; if (t.date > o.last) o.last = t.date; m.set(k, o); });
+  return [...m.values()];
+}
+function renderSugs() {
+  const q = $('#fName').value.trim();
+  let list = names();
+  if (q) list = list.filter(o => o.n.includes(q) && o.n !== q); else list.sort((a, b) => b.last.localeCompare(a.last));
+  $('#nameSugs').innerHTML = list.slice(0, 8).map(o => `<button data-n="${esc(o.n)}">${esc(o.n)}</button>`).join('');
+  // last amounts for this customer
+  const prev = TX.filter(t => t.name.trim() === q).sort((a, b) => b.date.localeCompare(a.date));
+  const amts = [...new Set(prev.map(t => +t.amount))].slice(0, 4);
+  $('#lastAmts').innerHTML = amts.map(a => `<button data-a="${a}">${fmt(a)}</button>`).join('');
+  if (prev[0] && !editId && !renderSugs.touched) { curMethod = prev[0].method; renderMethodChips(); }
+}
+$('#fName').oninput = () => { renderSugs.touched = false; renderSugs(); };
+$('#nameSugs').onclick = e => { const b = e.target.closest('button'); if (!b) return; $('#fName').value = b.dataset.n; renderSugs.touched = false; renderSugs(); $('#fAmt').focus(); };
+$('#lastAmts').onclick = e => { const b = e.target.closest('button'); if (b) $('#fAmt').value = b.dataset.a; };
+$('#fMeths').addEventListener('click', () => renderSugs.touched = true, true);
+
+function resetForm() {
+  editId = null; $('#fName').value = ''; $('#fAmt').value = ''; $('#fNote').value = ''; $('#fDate').value = today();
+  $('#fTitle').textContent = '➕ تسجيل قسط'; $('#saveBtn').textContent = '✅ سجّل القسط'; $('#saveBtn').classList.remove('edit');
+  $('#cancelEdit').style.display = 'none'; renderSugs.touched = false; renderSugs();
+}
+$('#cancelEdit').onclick = resetForm;
+$('#saveBtn').onclick = () => {
+  const name = $('#fName').value.trim(), amount = +toEn($('#fAmt').value), date = $('#fDate').value || today();
+  if (!name) { toast('✍️ اكتب اسم العميل', 1); $('#fName').focus(); return; }
+  if (!(amount > 0)) { toast('💵 اكتب المبلغ', 1); $('#fAmt').focus(); return; }
+  if (!curMethod) { toast('💳 اختار طريقة الدفع', 1); return; }
+  const m = mById(curMethod);
+  if (editId) {
+    const t = TX.find(x => x.id === editId); if (!t) { resetForm(); return; }
+    Object.assign(t, { name, amount, date, method: m.id, mname: m.name, note: $('#fNote').value.trim() });
+    saveTx(); enqueue({ action: 'update', tx: t }); toast('✏️ اتعدّل');
+  } else {
+    const t = { id: uid(), name, amount, date, method: m.id, mname: m.name, note: $('#fNote').value.trim(), created: new Date().toISOString() };
+    TX.push(t); saveTx(); enqueue({ action: 'save', tx: t }); toast('✅ اتسجل ' + fmt(amount) + ' من ' + name);
+  }
+  resetForm(); renderAll();
+};
+$('#fAmt').addEventListener('keydown', e => { if (e.key === 'Enter') $('#saveBtn').click(); });
+
+function startEdit(id) {
+  const t = TX.find(x => x.id === id); if (!t) return;
+  editId = id; $('#fName').value = t.name; $('#fAmt').value = t.amount; $('#fDate').value = t.date; $('#fNote').value = t.note || '';
+  curMethod = t.method; renderSugs.touched = true; renderMethodChips(); renderSugs();
+  $('#fTitle').textContent = '✏️ تعديل القسط'; $('#saveBtn').textContent = '💾 احفظ التعديل'; $('#saveBtn').classList.add('edit');
+  $('#cancelEdit').style.display = 'block'; $('#formCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function delTx(id) {
+  TX = TX.filter(t => t.id !== id); saveTx();
+  QUEUE = QUEUE.filter(q => !(q.tx && q.tx.id === id)); store(LS.q, QUEUE);
+  enqueue({ action: 'delete', id }); toast('🗑️ اتمسح'); renderAll();
+}
+
+// ---------- summary ----------
+function renderSum() {
+  const d = today(), m = d.slice(0, 7), y = d.slice(0, 4);
+  const mt = TX.filter(t => t.date.startsWith(m));
+  $('#sDay').textContent = fmt(sum(TX.filter(t => t.date === d)));
+  $('#sMon').textContent = fmt(sum(mt));
+  $('#sYear').textContent = fmt(sum(TX.filter(t => t.date.startsWith(y))));
+  $('#sAll').textContent = fmt(sum(TX));
+  const by = METHODS.map(x => [x, sum(mt.filter(t => t.method === x.id))]).filter(a => a[1] > 0);
+  $('#sMonC').innerHTML = by.length ? by.map(([x, v]) => `${x.emoji} <span class="num">${fmt(v)}</span>`).join(' · ') : mt.length + ' قسط';
+}
+
+// ---------- tiles ----------
+function openCur(id) {
+  $$('.cur').forEach(c => c.classList.toggle('on', c.id === id && !c.classList.contains('on')));
+  $$('.tile').forEach(t => t.classList.toggle('on', $('#' + t.dataset.c).classList.contains('on')));
+  const c = $('#' + id); if (c.classList.contains('on')) setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+$$('.tile').forEach(t => t.onclick = () => openCur(t.dataset.c));
+
+// ---------- report ----------
+let rMode = 'm', rAnchor = new Date();
+$('#rMode').onclick = e => { const b = e.target.closest('button'); if (!b) return; rMode = b.dataset.m; $$('#rMode button').forEach(x => x.classList.toggle('on', x === b)); renderRep(); };
+function shift(dir) {
+  const d = new Date(rAnchor);
+  if (rMode === 'd') d.setDate(d.getDate() + dir); else if (rMode === 'm') { d.setDate(1); d.setMonth(d.getMonth() + dir); } else d.setFullYear(d.getFullYear() + dir);
+  rAnchor = d; renderRep();
+}
+$('#rPrev').onclick = () => shift(-1); $('#rNext').onclick = () => shift(1);
+function bars(rows, total) {
+  if (!rows.length) return '<div class="empty">مفيش أقساط في الفترة دي</div>';
+  return rows.map(r => `<div class="bar"><div class="t"><span>${r.l}</span><span><b class="num" style="color:var(--txt)">${fmt(r.v)}</b> · ${total ? Math.round(r.v / total * 100) : 0}%${r.c != null ? ' · ' + r.c + ' قسط' : ''}</span></div><div class="tr"><i style="width:${total ? r.v / total * 100 : 0}%;background:${r.col || 'var(--acc)'}"></i></div></div>`).join('');
+}
+function renderRep() {
+  const a = rAnchor, key = rMode === 'd' ? ymd(a) : rMode === 'm' ? ymd(a).slice(0, 7) : String(a.getFullYear());
+  $('#rLbl').textContent = rMode === 'd' ? `${DAYS[a.getDay()]} ${a.getDate()} ${MONTHS[a.getMonth()]} ${a.getFullYear()}` : rMode === 'm' ? `${MONTHS[a.getMonth()]} ${a.getFullYear()}` : `سنة ${a.getFullYear()}`;
+  const list = TX.filter(t => t.date.startsWith(key)), tot = sum(list);
+  $('#rTot').textContent = fmt(tot) + ' ج';
+  $('#rCnt').textContent = list.length + ' قسط · ' + new Set(list.map(t => t.name.trim())).size + ' عميل';
+  const ms = {}; list.forEach(t => { const m = methOf(t); (ms[m.id] ||= { m, v: 0, c: 0 }); ms[m.id].v += +t.amount; ms[m.id].c++; });
+  $('#rMeth').innerHTML = bars(Object.values(ms).sort((x, y) => y.v - x.v).map(o => ({ l: o.m.emoji + ' ' + esc(o.m.name), v: o.v, c: o.c, col: o.m.color })), tot);
+  // breakdown: year → months, month → days
+  if (rMode === 'd') { $('#rBrkT').style.display = 'none'; $('#rBrk').innerHTML = ''; }
+  else {
+    $('#rBrkT').style.display = ''; $('#rBrkT').textContent = rMode === 'y' ? '📆 حسب الشهور' : '📆 حسب الأيام';
+    const g = {}; list.forEach(t => { const k = rMode === 'y' ? t.date.slice(5, 7) : t.date.slice(8, 10); g[k] = (g[k] || 0) + +t.amount; });
+    const mx = Math.max(0, ...Object.values(g));
+    $('#rBrk').innerHTML = Object.keys(g).sort().map(k => ({ l: rMode === 'y' ? MONTHS[+k - 1] : `${DAYS[new Date(key + '-' + k + 'T12:00').getDay()]} ${+k}`, v: g[k] }))
+      .map(r => `<div class="bar"><div class="t"><span>${r.l}</span><span class="num">${fmt(r.v)}</span></div><div class="tr"><i style="width:${r.v / mx * 100}%;background:var(--acc)"></i></div></div>`).join('') || '<div class="empty">—</div>';
+  }
+  const cs = {}; list.forEach(t => { const k = t.name.trim(); (cs[k] ||= { v: 0, c: 0 }); cs[k].v += +t.amount; cs[k].c++; });
+  $('#rCus').innerHTML = bars(Object.entries(cs).sort((x, y) => y[1].v - x[1].v).slice(0, 10).map(([n, o]) => ({ l: '👤 ' + esc(n), v: o.v, c: o.c })), tot);
+}
+
+// ---------- log ----------
+let lRange = 'all', lMeth = '';
+$('#lDates').onclick = e => { const b = e.target.closest('button'); if (!b) return; lRange = b.dataset.r; $$('#lDates button').forEach(x => x.classList.toggle('on', x === b)); $('#lRange').classList.toggle('on', lRange === 'custom'); renderLog(); };
+$('#lMeths').onclick = e => { const b = e.target.closest('button'); if (!b) return; lMeth = b.dataset.id; renderLog(); };
+$('#lQ').oninput = $('#lFrom').onchange = $('#lTo').onchange = () => renderLog();
+function inRange(d) {
+  const t = today(), now = new Date();
+  if (lRange === 'today') return d === t;
+  if (lRange === '7') { const f = new Date(); f.setDate(f.getDate() - 6); return d >= ymd(f) && d <= t; }
+  if (lRange === 'month') return d.startsWith(t.slice(0, 7));
+  if (lRange === 'last') { const f = new Date(now.getFullYear(), now.getMonth() - 1, 1); return d.startsWith(ymd(f).slice(0, 7)); }
+  if (lRange === 'custom') { const f = $('#lFrom').value, to = $('#lTo').value; return (!f || d >= f) && (!to || d <= to); }
+  return true;
+}
+function itemHTML(t, actions = true) {
+  const m = methOf(t), dd = new Date(t.date + 'T12:00');
+  return `<div class="it"><div class="dot" style="background:color-mix(in srgb,${m.color} 20%,transparent)">${m.emoji}</div>
+    <div class="m"><b>${esc(t.name)}</b><small>${esc(m.name)} · ${DAYS[dd.getDay()]} ${dd.getDate()} ${MONTHS[dd.getMonth()]}${t.note ? ' · ' + esc(t.note) : ''}</small></div>
+    <span class="a num">${fmt(t.amount)}</span>${actions ? `<div class="ac"><button data-e="${t.id}">✏️</button><button data-d="${t.id}">🗑️</button></div>` : ''}</div>`;
+}
+function renderLog() {
+  $('#lMeths').innerHTML = `<button data-id="" class="${lMeth ? '' : 'on'}">كل الطرق</button>` + METHODS.map(m => `<button data-id="${esc(m.id)}" class="${lMeth === m.id ? 'on' : ''}">${m.emoji} ${esc(m.name)}</button>`).join('');
+  const q = toEn($('#lQ').value.trim());
+  const list = TX.filter(t => inRange(t.date) && (!lMeth || t.method === lMeth) && (!q || t.name.includes(q) || String(t.amount).includes(q) || (t.note || '').includes(q)))
+    .sort((a, b) => b.date.localeCompare(a.date) || (b.created || '').localeCompare(a.created || ''));
+  $('#lCnt').textContent = TX.length + ' معاملة';
+  $('#lSum').innerHTML = list.length ? `الإجمالي: <b class="num" style="color:var(--acc)">${fmt(sum(list))}</b> ج · ${list.length} قسط` : '';
+  $('#lList').innerHTML = list.slice(0, 300).map(t => itemHTML(t)).join('') || '<div class="empty">مفيش نتايج</div>';
+}
+document.addEventListener('click', e => {
+  const ed = e.target.closest('[data-e]'); if (ed) { startEdit(ed.dataset.e); return; }
+  const d = e.target.closest('[data-d]');
+  if (d) {
+    if (d.classList.contains('sure')) { delTx(d.dataset.d); return; }
+    $$('.sure').forEach(x => { x.classList.remove('sure'); x.textContent = '🗑️'; });
+    d.classList.add('sure'); d.textContent = 'متأكد؟';
+    setTimeout(() => { if (d.isConnected) { d.classList.remove('sure'); d.textContent = '🗑️'; } }, 3000);
+  }
+});
+
+// ---------- customers ----------
+let openCust = null;
+$('#cQ').oninput = () => renderCus();
+function renderCus() {
+  const q = $('#cQ').value.trim(), m = {};
+  TX.forEach(t => { const k = t.name.trim(); (m[k] ||= { n: k, v: 0, c: 0, last: '', list: [] }); const o = m[k]; o.v += +t.amount; o.c++; o.list.push(t); if (t.date > o.last) o.last = t.date; });
+  const arr = Object.values(m).filter(o => !q || o.n.includes(q)).sort((a, b) => b.last.localeCompare(a.last));
+  $('#cCnt').textContent = Object.keys(m).length + ' عميل';
+  $('#cList').innerHTML = arr.map(o => {
+    const dd = new Date(o.last + 'T12:00');
+    const det = o.n === openCust ? `<div class="cdet on">${o.list.sort((a, b) => b.date.localeCompare(a.date)).map(t => itemHTML(t)).join('')}</div>` : '';
+    return `<div class="it cust" data-c="${esc(o.n)}"><div class="dot" style="background:rgba(163,230,53,.12)">👤</div><div class="m"><b>${esc(o.n)}</b><small>${o.c} قسط · آخر دفعة ${dd.getDate()} ${MONTHS[dd.getMonth()]}</small></div><span class="a num">${fmt(o.v)}</span></div>${det}`;
+  }).join('') || '<div class="empty">لسه مفيش عملاء</div>';
+}
+$('#cList').onclick = e => {
+  if (e.target.closest('.ac')) return;
+  const c = e.target.closest('.cust'); if (!c) return;
+  openCust = openCust === c.dataset.c ? null : c.dataset.c; renderCus();
+};
+
+// ---------- methods ----------
+let newEmo = EMOJIS[0], newCol = COLORS[0], renId = null;
+function renderMet() {
+  $('#mList').innerHTML = METHODS.map(m => {
+    const n = TX.filter(t => t.method === m.id).length;
+    if (renId === m.id) return `<div class="it"><div class="dot" style="background:color-mix(in srgb,${m.color} 20%,transparent)">${m.emoji}</div><input class="inp" id="renInp" value="${esc(m.name)}" style="flex:1"><div class="ac"><button data-rs="${esc(m.id)}">✔️</button></div></div>`;
+    return `<div class="it"><div class="dot" style="background:color-mix(in srgb,${m.color} 20%,transparent)">${m.emoji}</div><div class="m"><b>${esc(m.name)}</b><small>${n} قسط · ${fmt(sum(TX.filter(t => t.method === m.id)))} ج</small></div>
+      <div class="ac"><button data-rn="${esc(m.id)}">✏️</button>${METHODS.length > 1 ? `<button data-md="${esc(m.id)}">🗑️</button>` : ''}</div></div>`;
+  }).join('');
+  $('#mEmo').innerHTML = EMOJIS.map(e => `<button class="${e === newEmo ? 'on' : ''}" data-v="${e}">${e}</button>`).join('');
+  $('#mCol').innerHTML = COLORS.map(c => `<button class="${c === newCol ? 'on' : ''}" data-v="${c}" style="background:${c}"></button>`).join('');
+}
+$('#mEmo').onclick = e => { const b = e.target.closest('button'); if (b) { newEmo = b.dataset.v; renderMet(); } };
+$('#mCol').onclick = e => { const b = e.target.closest('button'); if (b) { newCol = b.dataset.v; renderMet(); } };
+function saveMethods() { store(LS.m, METHODS); enqueue({ action: 'setMethods', methods: METHODS }); renderAll(); }
+$('#mAdd').onclick = () => {
+  const n = $('#mName').value.trim(); if (!n) { toast('✍️ اكتب اسم الطريقة', 1); return; }
+  if (METHODS.some(m => m.name === n)) { toast('⚠️ الطريقة دي موجودة', 1); return; }
+  const m = { id: 'm' + uid(), name: n, emoji: newEmo, color: newCol };
+  METHODS.push(m); $('#mName').value = ''; curMethod = m.id; saveMethods(); toast('✅ اتضافت ' + n);
+};
+$('#mList').onclick = e => {
+  const rn = e.target.closest('[data-rn]'); if (rn) { renId = rn.dataset.rn; renderMet(); $('#renInp').focus(); return; }
+  const rs = e.target.closest('[data-rs]');
+  if (rs) { const v = $('#renInp').value.trim(), m = METHODS.find(x => x.id === rs.dataset.rs); renId = null; if (m && v) { m.name = v; TX.forEach(t => { if (t.method === m.id) t.mname = v; }); saveTx(); saveMethods(); } else renderMet(); return; }
+  const md = e.target.closest('[data-md]');
+  if (md) {
+    const id = md.dataset.md, used = TX.some(t => t.method === id);
+    if (!md.classList.contains('sure')) { md.classList.add('sure'); md.textContent = used ? 'هتفضل في السجل، متأكد؟' : 'متأكد؟'; setTimeout(() => { if (md.isConnected) { md.classList.remove('sure'); md.textContent = '🗑️'; } }, 3000); return; }
+    METHODS = METHODS.filter(m => m.id !== id); saveMethods(); toast('🗑️ اتشالت الطريقة');
+  }
+};
+
+// ---------- settings ----------
+$('#sUrl').value = CFG.url; $('#sTok').value = CFG.token;
+$('#sSave').onclick = async () => {
+  CFG = { url: $('#sUrl').value.trim(), token: $('#sTok').value.trim() || 'ihab-aqsati' }; store(LS.cfg, CFG);
+  if (!CFG.url) { $('#sMsg').textContent = 'اتشال الربط — البيانات على الموبايل بس'; setSync('', 'محلي'); return; }
+  $('#sMsg').textContent = '⏳ بجرّب...';
+  try { await api({ action: 'ping' }); $('#sMsg').textContent = '✅ الربط شغال'; if (!TX.length) pull(); else flush(); }
+  catch (e) { $('#sMsg').textContent = errTxt(e.message); }
+};
+$('#sPull').onclick = () => { if (!CFG.url) return toast('⚙️ حط رابط الشيت الأول', 1); pull(); };
+$('#sPush').onclick = () => {
+  if (!CFG.url) return toast('⚙️ حط رابط الشيت الأول', 1);
+  TX.forEach(t => QUEUE.push({ action: 'save', tx: t })); QUEUE.push({ action: 'setMethods', methods: METHODS }); store(LS.q, QUEUE);
+  toast('⬆️ بيرفع ' + TX.length + ' معاملة'); flush();
+};
+
+// ---------- update ----------
+async function checkUpdate() {
+  try { const r = await fetch('version.json?' + Date.now(), { cache: 'no-store' }); const j = await r.json();
+    if (j.v > APP_V) { $('#updBadge').style.display = 'flex'; $('#updNotes').innerHTML = (j.notes || []).map(n => '<li>' + esc(n) + '</li>').join(''); return j; } } catch (e) {}
+  return null;
+}
+$('#updBtn').onclick = async () => {
+  const j = await checkUpdate();
+  if (!j) { toast('✅ انت على آخر نسخة'); return; }
+  $('#updTitle').textContent = '🆕 الجديد في التحديث'; $('#updBtns').style.display = 'flex'; $('#updCard').classList.add('on');
+};
+$('#updLater').onclick = () => $('#updCard').classList.remove('on');
+$('#updNow').onclick = async () => {
+  try { const j = await checkUpdate(); localStorage.setItem('aq_updNotes', JSON.stringify(j ? j.notes : []));
+    const ks = await caches.keys(); await Promise.all(ks.map(k => caches.delete(k)));
+    const rs = await navigator.serviceWorker?.getRegistrations?.() || []; await Promise.all(rs.map(r => r.update().catch(() => {}))); } catch (e) {}
+  location.reload();
+};
+(function afterUpdate() {
+  const n = localStorage.getItem('aq_updNotes'); if (n == null) return; localStorage.removeItem('aq_updNotes');
+  $('#updTitle').textContent = '✅ اتحدّث'; $('#updNotes').innerHTML = JSON.parse(n).map(x => '<li>' + esc(x) + '</li>').join('');
+  $('#updBtns').style.display = 'none'; $('#updCard').classList.add('on'); setTimeout(() => $('#updCard').classList.remove('on'), 6000);
+})();
+
+// ---------- boot ----------
+function renderAll() { renderMethodChips(); renderSum(); renderRep(); renderLog(); renderCus(); renderMet(); }
+$('#fDate').value = today(); renderAll(); renderSugs();
+if (CFG.url) { flush(); pull(true); }
+checkUpdate();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { checkUpdate(); if (CFG.url) pull(true); } });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
