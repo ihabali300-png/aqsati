@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>كود الشيت — أقساطي</title>
+<style>
+body{margin:0;background:#050f08;color:#e8f5e9;font-family:Cairo,system-ui,sans-serif;padding:20px;max-width:900px;margin:auto}
+h1{font-size:22px}
+button{width:100%;padding:22px;border:0;border-radius:18px;background:linear-gradient(135deg,#ecfccb,#a3e635 50%,#4d7c0f);color:#0a1a0e;font-size:24px;font-weight:900;cursor:pointer;font-family:inherit}
+button.ok{background:#22c55e;color:#fff}
+#st{text-align:center;font-size:18px;font-weight:800;margin:14px 0;min-height:28px}
+ol{line-height:2;font-size:16px}
+textarea{width:100%;height:300px;background:#0c1c12;color:#a3e635;border:1px solid #1d3a25;border-radius:12px;padding:10px;font-family:monospace;font-size:12px;direction:ltr;box-sizing:border-box}
+</style>
+</head>
+<body>
+<h1>📋 كود الشيت — أقساطي</h1>
+<button id="cp">📋 انسخ الكود كله</button>
+<div id="st"></div>
+<ol>
+  <li>دوس الزرار الأخضر فوق.</li>
+  <li>روح لـ Apps Script، دوس جوه الكود، واعمل <b>Ctrl + A</b> ثم <b>Ctrl + V</b>.</li>
+  <li>احفظ بـ <b>Ctrl + S</b>.</li>
+</ol>
+<textarea id="code" readonly>⏳ بيحمّل...</textarea>
+<script>
+const t = document.getElementById('code'), st = document.getElementById('st'), b = document.getElementById('cp');
+fetch('apps-script.gs?' + Date.now(), { cache: 'no-store' }).then(r => r.text()).then(x => { t.value = x; st.textContent = '✅ الكود جاهز (' + x.split('\n').length + ' سطر)'; });
+b.onclick = async () => {
+  try { await navigator.clipboard.writeText(t.value); }
+  catch (e) { t.focus(); t.select(); document.execCommand('copy'); }
+  b.textContent = '✅ اتنسخ! روح الصقه'; b.classList.add('ok'); st.textContent = '✅ اتنسخ ' + t.value.split('\n').length + ' سطر';
+};
+</script>
+</body>
+</html>
