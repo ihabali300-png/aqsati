@@ -182,6 +182,7 @@ button:active{transform:scale(.96)}
 header{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);background:color-mix(in srgb,var(--bg) 78%,transparent)!important}
 html{scroll-behavior:smooth}
 .save.done,.addBtn.done{animation:pop .45s}
+.inp.flash{animation:fl .7s}@keyframes fl{30%{border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 30%,transparent)}}
 @keyframes pop{40%{transform:scale(1.04)}}
 
 .addBtn{width:100%;display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-radius:18px;background:var(--grad);color:var(--onacc);font-size:17px;font-weight:900;margin-bottom:10px;box-shadow:0 8px 24px -12px var(--acc)}
@@ -198,6 +199,25 @@ html{scroll-behavior:smooth}
 .htot{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-bottom:2px}
 .htot .dv{font-size:32px}
 #rPie{width:190px;height:190px;margin-bottom:6px}
+.ocrSt{font-size:12px;color:var(--mut);min-height:0;margin-top:4px;display:flex;align-items:center;gap:6px}
+.ocrSt:empty{display:none}
+.ocrSt .bar{flex:1;height:5px;border-radius:4px;background:color-mix(in srgb,var(--fg) 8%,transparent);overflow:hidden}
+.ocrSt .bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.th.scan::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent,color-mix(in srgb,var(--acc) 45%,transparent),transparent);background-size:100% 40%;background-repeat:no-repeat;animation:scan 1.2s linear infinite}
+@keyframes scan{from{background-position:0 -40%}to{background-position:0 140%}}
+.sheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center}
+.sheet.on{display:flex;animation:fi .2s}
+.sh{width:100%;max-width:620px;background:var(--card);border:1px solid var(--line);border-radius:24px 24px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));text-align:center;animation:up .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(100%)}}
+.shH{font-weight:800;color:var(--mut);font-size:14px}
+.shAmt{font-size:40px;font-weight:900;color:var(--acc);margin:4px 0}.shAmt small{font-size:15px;color:var(--mut)}
+.shM{font-weight:800;font-size:14px;margin-bottom:4px}.shM:empty{display:none}
+.shQ{font-size:15px;font-weight:700;margin:6px 0 10px}
+.shAlt{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}.shAlt:empty{display:none}
+.shAlt button{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:5px 12px;font-weight:800}
+.shAlt button.on{border-color:var(--acc);color:var(--acc)}
+.shB{display:flex;gap:8px}.shB button{flex:1;padding:13px;border-radius:14px;font-weight:900;font-size:16px;background:var(--card2)}
+.shB .yes{flex:2;background:var(--grad);color:var(--onacc)}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('aq_theme')||'lime'}catch(e){}</script>
 </head>
@@ -234,6 +254,15 @@ html{scroll-behavior:smooth}
   <label class="f">👤 اسم العميل</label>
   <input class="inp" id="fName" placeholder="اكتب الاسم" autocomplete="off">
   <div class="sugs" id="nameSugs"></div>
+  <label class="f">📎 صورة التحويل (اختياري) — بقرا منها المبلغ لوحدي 🔍</label>
+  <div class="phRow">
+    <button class="phBtn" id="phCam">📷 الكاميرا</button>
+    <button class="phBtn" id="phGal">🖼️ المعرض</button>
+  </div>
+  <input type="file" id="inCam" accept="image/*" capture="environment" hidden>
+  <input type="file" id="inGal" accept="image/*" multiple hidden>
+  <div class="thumbs" id="fThumbs"></div>
+  <div class="ocrSt" id="ocrSt"></div>
   <label class="f">💵 المبلغ (جنيه)</label>
   <input class="inp amt" id="fAmt" inputmode="decimal" placeholder="0">
   <div class="quick" id="lastAmts"></div>
@@ -243,14 +272,7 @@ html{scroll-behavior:smooth}
     <div><label class="f">📅 التاريخ</label><input class="inp" type="date" id="fDate"></div>
     <div><label class="f">📝 ملاحظة</label><input class="inp" id="fNote" placeholder="اختياري"></div>
   </div>
-  <label class="f">📎 صور التحويل (اختياري)</label>
-  <div class="phRow">
-    <button class="phBtn" id="phCam">📷 الكاميرا</button>
-    <button class="phBtn" id="phGal">🖼️ المعرض</button>
-  </div>
-  <input type="file" id="inCam" accept="image/*" capture="environment" hidden>
-  <input type="file" id="inGal" accept="image/*" multiple hidden>
-  <div class="thumbs" id="fThumbs"></div>
+
   <button class="save" id="saveBtn">✅ سجّل القسط</button>
   <button class="cancel" id="cancelEdit">إلغاء التعديل</button>
 </section>
@@ -329,6 +351,14 @@ html{scroll-behavior:smooth}
 </section>
 
 <div class="toast" id="toast"></div>
+<div class="sheet" id="ocrSheet"><div class="sh">
+  <div class="shH">🧾 لقيت في الإيصال</div>
+  <div class="shAmt"><span class="num" id="ocrAmt">0</span> <small>جنيه</small></div>
+  <div class="shM" id="ocrM"></div>
+  <div class="shQ" id="ocrQ"></div>
+  <div class="shAlt" id="ocrAlt"></div>
+  <div class="shB"><button class="yes" id="ocrYes">✅ أيوه، ضيفه</button><button id="ocrNo">لأ</button></div>
+</div></div>
 <div class="vw" id="vw">
   <div class="vwTop"><button id="vwX">✕</button><b id="vwT"></b><a id="vwOpen" target="_blank" rel="noopener" title="افتح في درايف">↗</a></div>
   <div class="vwBox" id="vwBox"><div class="vwMsg">⏳</div></div>
@@ -336,7 +366,7 @@ html{scroll-behavior:smooth}
 </div>
 
 <script>
-const APP_V = 6;
+const APP_V = 7;
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => (Math.round(+n * 100) / 100).toLocaleString('en-US');
@@ -480,18 +510,130 @@ $('#lastAmts').onclick = e => { const b = e.target.closest('button'); if (b) $('
 $('#fMeths').addEventListener('click', () => renderSugs.touched = true, true);
 
 async function addFiles(files) {
+  const added = [];
   for (const f of files) {
     if (!f.type.startsWith('image/')) continue;
     const p = { id: 'p' + uid(), name: f.name || 'photo.jpg', type: f.type || 'image/jpeg' };
     try { await idb.set(p.id, f); } catch (e) { toast('⚠️ مقدرتش أحفظ الصورة', 1); continue; }
-    fPhotos.push(p);
+    fPhotos.push(p); added.push(p);
   }
-  renderThumbs();
+  await renderThumbs();
+  if (added.length) scanReceipt(added[0]);
 }
+// ---------- OCR: يقرا المبلغ من صورة التحويل ----------
+let ocrP = null, ocrProg = 0;
+const loadJS = src => new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = () => rej(new Error('Failed to fetch')); document.head.appendChild(sc); });
+const ocrLog = m => { if (m.status === 'recognizing text') setOcr('🔍 بقرا الإيصال...', m.progress); else if (/load/.test(m.status)) setOcr('⬇️ بجهّز قارئ الإيصالات (أول مرة بس)...', m.progress); };
+let ocrE = null;
+function ocrWorkerEng() {   // قراية تانية بالإنجليزي على نسخة أصغر: أدق في الأرقام الكبيرة
+  if (!ocrE) ocrE = ocrWorker().then(() => Tesseract.createWorker('eng', 1, { ...((window.OCR_PATHS || {}).opts || {}), logger: ocrLog })).catch(e => { ocrE = null; throw e; });
+  return ocrE;
+}
+function ocrWorker() {
+  if (!ocrP) ocrP = (async () => {
+    const O = window.OCR_PATHS || {};
+    if (!window.Tesseract) await loadJS(O.lib || 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js');
+    return Tesseract.createWorker(['eng', 'ara'], 1, { ...(O.opts || {}), logger: ocrLog });
+  })().catch(e => { ocrP = null; throw e; });
+  return ocrP;
+}
+function setOcr(t, p) { $('#ocrSt').innerHTML = t ? `<span>${t}</span>${p != null ? `<span class="bar"><i style="width:${Math.round(p * 100)}%"></i></span>` : ''}` : ''; }
+async function prepImg(blob, max = 2000) {   // نسخة للقراية بس — الأصل بيتحفظ بجودته
+  const bmp = await createImageBitmap(blob), k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  const x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(bmp, 0, 0, c.width, c.height);
+  const d = x.getImageData(0, 0, c.width, c.height), a = d.data; let L = 0;
+  for (let i = 0; i < a.length; i += 4) { const g = 0.299 * a[i] + 0.587 * a[i + 1] + 0.114 * a[i + 2]; a[i] = a[i + 1] = a[i + 2] = g; L += g; }
+  if (L / (a.length / 4) < 110) for (let i = 0; i < a.length; i += 4) a[i] = a[i + 1] = a[i + 2] = 255 - a[i];   // دارك مود → اعكس
+  x.putImageData(d, 0, 0); return c;
+}
+const AR_DIG = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/٬/g, ',').replace(/٫/g, '.');
+const ocrLines = d => {
+  const L = (d.lines || []).map(l => ({ t: l.text || '', h: l.bbox ? l.bbox.y1 - l.bbox.y0 : 0 })).filter(l => l.t.trim());
+  if (!L.length) return (d.text || '').split(/\n+/).map(t => ({ t, h: 1 }));
+  const hs = L.map(l => l.h).sort((a, b) => a - b), med = hs[hs.length >> 1] || 1;
+  return L.map(l => ({ t: l.t, h: l.h / med }));
+};
+function findAmounts(lineObjs) {
+  const lines = lineObjs.map(l => AR_DIG(l.t).replace(/\n/g, ' ')), out = [];
+  const CUR = /(EGP|E\.?G\.?P|L\.?E\b|جنيه|جنيها|ج\.?م|جم\b|£)/i, KEY = /(amount|المبلغ|مبلغ|بمبلغ|قيمة|قيمه|transfer|sent|received|paid|تحويل|استلام|ارسال|إرسال|استلمت|دفع)/i;
+  const BAD = /(fee|fees|رسوم|مصاريف|balance|رصيد|commission|عمولة|عموله)/i, REF = /(ref|reference|رقم العملية|رقم المرجع|مرجع|transaction|id\b|رقم الهاتف|mobile|phone|IPA|حساب)/i;
+  lines.forEach((ln, i) => {
+    const ctx = (lines[i - 1] || '') + ' ' + ln;
+    for (const m of ln.matchAll(/(\d{1,3}(?:[,،]\d{3})+|\d+)(?:\.(\d{1,2}))?(?!\d)/g)) {
+      const raw = m[0], intp = m[1].replace(/[,،]/g, ''), before = ln.slice(Math.max(0, m.index - 2), m.index), after = ln.slice(m.index + raw.length, m.index + raw.length + 2);
+      if (/[:\/]/.test(before + after) || /^-\d|\d-$/.test(before + after) || /\d[.\-\/]$/.test(before)) continue;   // وقت/تاريخ
+      if (!/[,،]/.test(m[1]) && intp.length >= 7) continue;                     // تليفون / رقم مرجع
+      const v = parseFloat(intp + (m[2] ? '.' + m[2] : '')); if (!(v >= 1 && v <= 2000000)) continue;
+      if (/^(19|20)\d\d$/.test(intp) && !m[2]) continue;                        // سنة
+      const near = ln.slice(Math.max(0, m.index - 12), m.index + raw.length + 12);
+      let sc = 0;
+      if (CUR.test(near)) sc += 10; else if (CUR.test(ln)) sc += 5;
+      if (KEY.test(ctx)) sc += 5;
+      if (m[2]) sc += 2;
+      if (/[,،]/.test(m[1])) sc += 1;
+      const h = lineObjs[i].h || 1; if (h >= 1.5) sc += 7; else if (h >= 1.2) sc += 3;   // المبلغ غالبًا أكبر خط
+      if (lines[i].replace(/[^\d\u0600-\u06FFA-Za-z]/g, '').length <= raw.replace(/\D/g, '').length + 8) sc += 2;   // سطر لوحده تقريبًا
+      if (BAD.test(ln)) sc -= 12;
+      if (REF.test(ln)) sc -= 8;
+      out.push({ v, sc });
+    }
+  });
+  const best = new Map(); out.forEach(o => { if (!best.has(o.v) || best.get(o.v) < o.sc) best.set(o.v, o.sc); });
+  return [...best].map(([v, sc]) => ({ v, sc })).filter(o => o.sc > 0).sort((a, b) => b.sc - a.sc || b.v - a.v).slice(0, 4);
+}
+function findMethod(text) {
+  const t = AR_DIG(text);
+  const has = id => METHODS.find(m => m.id === id);
+  if (/insta\s*pay|انستا\s*باي|إنستا\s*باي|انستاباي|إنستاباي/i.test(t) && has('insta')) return 'insta';
+  if (/vodafone|فودافون|vf\s*-?\s*cash/i.test(t) && has('vf')) return 'vf';
+  return null;
+}
+async function scanReceipt(p) {
+  const el = () => $(`.th[data-pid="${p.id}"]`);
+  try {
+    el()?.classList.add('scan'); setOcr('⏳ بجهّز...', 0);
+    const blob = await idb.get(p.id);
+    const w = await ocrWorker(), d1 = (await w.recognize(await prepImg(blob, 2000))).data;
+    const we = await ocrWorkerEng(), d2 = (await we.recognize(await prepImg(blob, 1000))).data;
+    let L = [...ocrLines(d1), ...ocrLines(d2)], c = findAmounts(L), txt = (d1.text || '') + '\n' + (d2.text || '');
+    if (!c.length || c[0].sc < 10) {   // الرقم كبير أوي؟ جرّب نسخة أصغر
+      const d3 = (await we.recognize(await prepImg(blob, 560))).data;
+      L = L.concat(ocrLines(d3)); c = findAmounts(L); txt += '\n' + (d3.text || '');
+    }
+    el()?.classList.remove('scan'); setOcr('');
+    const mid = findMethod(txt);
+    if (!c.length) { toast('🤔 مالقيتش مبلغ واضح في الصورة — اكتبه انت', 1); return; }
+    askAmount(c, mid);
+  } catch (e) { el()?.classList.remove('scan'); setOcr(''); toast(/fetch|network/i.test(e.message || '') ? '📡 قارئ الإيصالات محتاج نت أول مرة' : '⚠️ مقدرتش أقرا الصورة', 1); }
+}
+let ocrPick = null, ocrMid = null;
+function askAmount(c, mid) {
+  ocrPick = c[0].v; ocrMid = mid;
+  const cur = +toEn($('#fAmt').value);
+  const draw = () => {
+    $('#ocrAmt').textContent = fmt(ocrPick);
+    $('#ocrAlt').innerHTML = c.length > 1 ? c.map(o => `<button class="${o.v === ocrPick ? 'on' : ''}" data-v="${o.v}">${fmt(o.v)}</button>`).join('') : '';
+  };
+  const m = mid && mById(mid);
+  $('#ocrM').innerHTML = m ? `💳 الطريقة: ${m.emoji} ${esc(m.name)}` : '';
+  $('#ocrQ').innerHTML = cur > 0 && cur !== c[0].v ? `تحطه بدل المبلغ المكتوب (<span class="num">${fmt(cur)}</span>)؟` : 'تحب تضيف المبلغ ده؟';
+  $('#ocrYes').textContent = cur > 0 && cur !== c[0].v ? '✅ أيوه، بدّله' : '✅ أيوه، ضيفه';
+  draw(); $('#ocrAlt').onclick = e => { const b = e.target.closest('button'); if (b) { ocrPick = +b.dataset.v; draw(); } };
+  $('#ocrSheet').classList.add('on');
+}
+$('#ocrYes').onclick = () => {
+  $('#fAmt').value = ocrPick; if (ocrMid) { curMethod = ocrMid; renderSugs.touched = true; renderMethodChips(); }
+  $('#ocrSheet').classList.remove('on'); $('#fAmt').classList.add('flash'); setTimeout(() => $('#fAmt').classList.remove('flash'), 700);
+  toast('✅ اتحط المبلغ ' + fmt(ocrPick));
+};
+$('#ocrNo').onclick = () => $('#ocrSheet').classList.remove('on');
+$('#ocrSheet').onclick = e => { if (e.target.id === 'ocrSheet') $('#ocrSheet').classList.remove('on'); };
+
 const thumbURLs = new Map();
 async function renderThumbs() {
   const box = $('#fThumbs');
-  box.innerHTML = fPhotos.map((p, i) => `<div class="th" data-i="${i}">🖼️<button class="x" data-rm="${i}">✕</button>${p.fid ? '' : '<span class="up">⏳</span>'}</div>`).join('');
+  box.innerHTML = fPhotos.map((p, i) => `<div class="th" data-i="${i}" data-pid="${p.id}">🖼️<button class="x" data-rm="${i}">✕</button>${p.fid ? '' : '<span class="up">⏳</span>'}</div>`).join('');
   for (const [i, p] of fPhotos.entries()) {
     let u = thumbURLs.get(p.id);
     if (!u) { const b = await idb.get(p.id); if (b) { u = URL.createObjectURL(b); thumbURLs.set(p.id, u); } }
