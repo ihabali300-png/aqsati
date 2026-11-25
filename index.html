@@ -225,7 +225,7 @@ label.f{display:block;font-size:12px;color:var(--mut);margin:8px 2px 4px}
 <div class="toast" id="toast"></div>
 
 <script>
-const APP_V = 1;
+const APP_V = 2;
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => (Math.round(+n * 100) / 100).toLocaleString('en-US');
@@ -236,6 +236,7 @@ const MONTHS = ['يناير','فبراير','مارس','أبريل','مايو','
 const DAYS = ['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'];
 const toEn = s => String(s).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[٫,]/g, '.');
 
+const DEF_URL = 'https://script.google.com/macros/s/AKfycby4pIIPLo_gGhiz3uTgKbcc8z-7cvyyr7AhpSA08E7W4AYrao2XcOuLEE1lXsdt1a8H/exec';
 const DEF_METHODS = [
   { id: 'cash', name: 'كاش', emoji: '💵', color: '#4ade80' },
   { id: 'vf', name: 'فودافون كاش', emoji: '🔴', color: '#ef4444' },
@@ -248,7 +249,8 @@ const COLORS = ['#f97316','#eab308','#3b82f6','#06b6d4','#22c55e','#ec4899','#94
 const LS = { tx: 'aq_tx', m: 'aq_methods', q: 'aq_queue', cfg: 'aq_cfg' };
 const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch (e) { return d; } };
 const store = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
-let TX = load(LS.tx, []), METHODS = load(LS.m, null) || DEF_METHODS.slice(), QUEUE = load(LS.q, []), CFG = load(LS.cfg, { url: '', token: 'ihab-aqsati' });
+let TX = load(LS.tx, []), METHODS = load(LS.m, null) || DEF_METHODS.slice(), QUEUE = load(LS.q, []), CFG = load(LS.cfg, { url: DEF_URL, token: 'ihab-aqsati' });
+if (!CFG.url && !localStorage.getItem('aq_unlinked')) CFG.url = DEF_URL;
 let curMethod = METHODS[0]?.id, editId = null;
 const saveTx = () => store(LS.tx, TX);
 const mById = id => METHODS.find(m => m.id === id) || { id, name: id, emoji: '💳', color: '#94a3b8' };
@@ -527,6 +529,7 @@ $('#mList').onclick = e => {
 $('#sUrl').value = CFG.url; $('#sTok').value = CFG.token;
 $('#sSave').onclick = async () => {
   CFG = { url: $('#sUrl').value.trim(), token: $('#sTok').value.trim() || 'ihab-aqsati' }; store(LS.cfg, CFG);
+  if (!CFG.url) localStorage.setItem('aq_unlinked', '1'); else localStorage.removeItem('aq_unlinked');
   if (!CFG.url) { $('#sMsg').textContent = 'اتشال الربط — البيانات على الموبايل بس'; setSync('', 'محلي'); return; }
   $('#sMsg').textContent = '⏳ بجرّب...';
   try { await api({ action: 'ping' }); $('#sMsg').textContent = '✅ الربط شغال'; if (!TX.length) pull(); else flush(); }
