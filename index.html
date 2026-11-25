@@ -366,7 +366,7 @@ html{scroll-behavior:smooth}
 </div>
 
 <script>
-const APP_V = 7;
+const APP_V = 8;
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => (Math.round(+n * 100) / 100).toLocaleString('en-US');
@@ -538,6 +538,12 @@ function ocrWorker() {
   return ocrP;
 }
 function setOcr(t, p) { $('#ocrSt').innerHTML = t ? `<span>${t}</span>${p != null ? `<span class="bar"><i style="width:${Math.round(p * 100)}%"></i></span>` : ''}` : ''; }
+async function jpegFor(blob, max) {   // نسخة خفيفة للرفع للقراية بس
+  const bmp = await createImageBitmap(blob), k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+  return new Promise(r => c.toBlob(r, 'image/jpeg', 0.92));
+}
 async function prepImg(blob, max = 2000) {   // نسخة للقراية بس — الأصل بيتحفظ بجودته
   const bmp = await createImageBitmap(blob), k = Math.min(1, max / Math.max(bmp.width, bmp.height));
   const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
@@ -569,13 +575,14 @@ function findAmounts(lineObjs) {
       const near = ln.slice(Math.max(0, m.index - 12), m.index + raw.length + 12);
       let sc = 0;
       if (CUR.test(near)) sc += 10; else if (CUR.test(ln)) sc += 5;
-      if (KEY.test(ctx)) sc += 5;
+      const pre = ln.slice(Math.max(0, m.index - 28), m.index);
+      if (KEY.test(pre)) sc += 6; else if (KEY.test(ctx)) sc += 3;
       if (m[2]) sc += 2;
       if (/[,،]/.test(m[1])) sc += 1;
       const h = lineObjs[i].h || 1; if (h >= 1.5) sc += 7; else if (h >= 1.2) sc += 3;   // المبلغ غالبًا أكبر خط
       if (lines[i].replace(/[^\d\u0600-\u06FFA-Za-z]/g, '').length <= raw.replace(/\D/g, '').length + 8) sc += 2;   // سطر لوحده تقريبًا
-      if (BAD.test(ln)) sc -= 12;
-      if (REF.test(ln)) sc -= 8;
+      if (BAD.test(pre) || (BAD.test(ln) && !KEY.test(pre))) sc -= 12;
+      if (REF.test(pre)) sc -= 8;
       out.push({ v, sc });
     }
   });
@@ -594,9 +601,23 @@ async function scanReceipt(p) {
   try {
     el()?.classList.add('scan'); setOcr('⏳ بجهّز...', 0);
     const blob = await idb.get(p.id);
+    // 1) OCR جوجل عن طريق الشيت (أدق في العربي والأرقام العربي ٠١٢)
+    let gtxt = null;
+    if (CFG.url && navigator.onLine) {
+      try {
+        setOcr('🔍 بقرا الإيصال...', 0.3);
+        const j = await api({ action: 'ocr', type: 'image/jpeg', data: await b64(await jpegFor(blob, 2200)) });
+        gtxt = j.text || '';
+      } catch (e) { console.warn('google ocr', e); }
+    }
+    if (gtxt != null) {
+      const gc = findAmounts(gtxt.split(/\n+/).map(t => ({ t, h: 1 })));
+      if (gc.length && gc[0].sc >= 10) { el()?.classList.remove('scan'); setOcr(''); askAmount(gc, findMethod(gtxt)); return; }
+    }
+    // 2) قارئ على الموبايل (بيشتغل من غير نت بعد أول مرة)
     const w = await ocrWorker(), d1 = (await w.recognize(await prepImg(blob, 2000))).data;
     const we = await ocrWorkerEng(), d2 = (await we.recognize(await prepImg(blob, 1000))).data;
-    let L = [...ocrLines(d1), ...ocrLines(d2)], c = findAmounts(L), txt = (d1.text || '') + '\n' + (d2.text || '');
+    let L = [...ocrLines(d1), ...ocrLines(d2), ...(gtxt ? gtxt.split(/\n+/).map(t => ({ t, h: 1 })) : [])], c = findAmounts(L), txt = (d1.text || '') + '\n' + (d2.text || '') + '\n' + (gtxt || '');
     if (!c.length || c[0].sc < 10) {   // الرقم كبير أوي؟ جرّب نسخة أصغر
       const d3 = (await we.recognize(await prepImg(blob, 560))).data;
       L = L.concat(ocrLines(d3)); c = findAmounts(L); txt += '\n' + (d3.text || '');

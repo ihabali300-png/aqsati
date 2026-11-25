@@ -1,7 +1,8 @@
 /* أقساطي 💸 — كود الشيت (Google Apps Script)
    1) اعمل Google Sheet جديد ← Extensions ← Apps Script ← امسح اللي موجود والصق ده ← Save
    2) Deploy ← New deployment ← Web app ← Execute as: Me · Who has access: Anyone ← Deploy
-   3) انسخ الرابط اللي آخره /exec وحطه في التطبيق ← ⚙️ الإعدادات */
+   3) انسخ الرابط اللي آخره /exec وحطه في التطبيق ← ⚙️ الإعدادات
+   4) عشان قراية الإيصالات: Services (الخدمات) ➕ ← Drive API ← Add */
 
 const TOKEN = 'ihab-aqsati';   // لو غيّرتها هنا غيّرها في التطبيق كمان
 
@@ -30,6 +31,16 @@ function doPost(e) {
         const blob = Utilities.newBlob(Utilities.base64Decode(b.data), b.type || 'image/jpeg', b.name || ('photo_' + Date.now() + '.jpg'));
         const f = folder_().createFile(blob);
         return out_({ ok: true, fid: f.getId() });
+      }
+      case 'ocr': {   // قراية الإيصال بـ OCR بتاع جوجل (عربي + إنجليزي)
+        const blob = Utilities.newBlob(Utilities.base64Decode(b.data), b.type || 'image/jpeg', 'ocr.jpg');
+        let id;
+        if (Drive.Files.create) id = Drive.Files.create({ name: 'aqsati_ocr_tmp', mimeType: MimeType.GOOGLE_DOCS }, blob, { ocrLanguage: 'ar' }).id;
+        else id = Drive.Files.insert({ title: 'aqsati_ocr_tmp', mimeType: MimeType.GOOGLE_DOCS }, blob, { ocr: true, ocrLanguage: 'ar' }).id;
+        let text = '';
+        try { text = DocumentApp.openById(id).getBody().getText(); }
+        finally { try { DriveApp.getFileById(id).setTrashed(true); } catch (x) {} }
+        return out_({ ok: true, text });
       }
       case 'getPhoto': {
         const blob = DriveApp.getFileById(b.fid).getBlob();
