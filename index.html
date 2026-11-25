@@ -190,6 +190,14 @@ html{scroll-behavior:smooth}
 .drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s ease}
 .drop>div{overflow:hidden}
 .drop.on{grid-template-rows:1fr}
+.pie{width:210px;height:210px;margin:6px auto 0;filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
+.pie svg{width:100%;height:100%;overflow:visible}
+.pie path{stroke:var(--card);stroke-width:2.5;stroke-linejoin:round}
+.pie text{font:900 13px Cairo,sans-serif;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.45);stroke-width:3px;text-anchor:middle;dominant-baseline:central}
+.pie .empty{fill:color-mix(in srgb,var(--fg) 7%,transparent);stroke:none}
+.htot{display:flex;align-items:baseline;justify-content:center;gap:8px;margin-bottom:2px}
+.htot .dv{font-size:32px}
+#rPie{width:190px;height:190px;margin-bottom:6px}
 </style>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('aq_theme')||'lime'}catch(e){}</script>
 </head>
@@ -208,10 +216,8 @@ html{scroll-behavior:smooth}
 
 <section class="hero">
   <div class="hl">💰 دخل الشهر ده · <span id="hMonth"></span></div>
-  <div class="donut">
-    <svg viewBox="0 0 200 200" id="dSvg"><circle cx="100" cy="100" r="78" class="dBase"/><g id="dSegs" transform="rotate(-90 100 100)"></g></svg>
-    <div class="dc"><div class="dv num" id="sMon">0</div><div class="du">جنيه</div><div class="dn" id="sMonN">0 قسط</div></div>
-  </div>
+  <div class="htot"><span class="dv num" id="sMon">0</span><span class="du">جنيه · <span id="sMonN">0 قسط</span></span></div>
+  <div class="pie" id="hPie"></div>
   <div class="leg" id="sLeg"></div>
 </section>
 <section class="sum">
@@ -265,6 +271,8 @@ html{scroll-behavior:smooth}
   <div class="seg" id="rMode"><button data-m="d">يوم</button><button data-m="m" class="on">شهر</button><button data-m="y">سنة</button></div>
   <div class="pnav"><button id="rPrev">›</button><b id="rLbl"></b><button id="rNext">‹</button></div>
   <div class="tot"><div class="v num" id="rTot">0</div><div class="c" id="rCnt"></div></div>
+  <div class="pie" id="rPie"></div>
+  <div class="leg" id="rLeg"></div>
   <div class="sub">💳 حسب طريقة الدفع</div>
   <div id="rMeth"></div>
   <div class="sub" id="rBrkT">📆 حسب الشهور</div>
@@ -328,7 +336,7 @@ html{scroll-behavior:smooth}
 </div>
 
 <script>
-const APP_V = 5;
+const APP_V = 6;
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => (Math.round(+n * 100) / 100).toLocaleString('en-US');
@@ -577,21 +585,43 @@ function renderSum() {
   $('#sDayN').textContent = dt.length + ' قسط'; $('#sMonN2').textContent = mt.length + ' قسط'; $('#sYearN').textContent = yt.length + ' قسط'; $('#sAllN').textContent = TX.length + ' قسط';
   const g = {}; mt.forEach(t => { const x = methOf(t); (g[x.id] ||= { x, v: 0 }).v += +t.amount; });
   const by = Object.values(g).sort((a, b) => b.v - a.v);
-  // donut
-  const C = 2 * Math.PI * 78, gap = by.length > 1 ? 3 : 0, segs = $('#dSegs');
-  const have = new Map([...segs.children].map(c => [c.dataset.id, c]));
-  let off = 0;
-  by.forEach(({ x, v }) => {
-    const len = Math.max(0, v / tot * C - gap);
-    let c = have.get(x.id);
-    if (!c) { c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('cx', 100); c.setAttribute('cy', 100); c.setAttribute('r', 78); c.setAttribute('class', 'dSeg'); c.dataset.id = x.id;
-      c.style.strokeDasharray = '0 ' + C; c.style.strokeDashoffset = -off; segs.appendChild(c); c.getBoundingClientRect(); }
-    have.delete(x.id); c.style.stroke = x.color;
-    c.style.strokeDasharray = len + ' ' + (C - len); c.style.strokeDashoffset = -off; off += v / tot * C;
-  });
-  have.forEach(c => { c.style.strokeDasharray = '0 ' + C; setTimeout(() => c.remove(), 900); });
+  pie($('#hPie'), by.map(({ x, v }) => ({ id: x.id, v, color: x.color })));
   $('#sLeg').innerHTML = by.length ? by.map(({ x, v }) => `<span><i style="background:${x.color}"></i>${esc(x.name)} <b class="num">${fmt(v)}</b><small>${Math.round(v / tot * 100)}%</small></span>`).join('')
-    : '<span><small>سجّل أول قسط والدايرة هتبدأ تتلوّن 🎨</small></span>';
+    : '<span><small>سجّل أول قسط والكيكة هتبدأ تتقسّم 🎨</small></span>';
+}
+
+// ---------- pie (كيكة بقطاعات، بتتشكّل بأنيميشن) ----------
+function pie(el, items) {
+  const tot = items.reduce((a, b) => a + b.v, 0), R = 100, TAU = Math.PI * 2;
+  const target = new Map(); let a = 0;
+  items.forEach(it => { const sp = tot ? it.v / tot * TAU : 0; target.set(it.id, { a0: a, a1: a + sp, color: it.color, pct: tot ? it.v / tot : 0 }); a += sp; });
+  const prev = el._prev || new Map();
+  const ids = [...new Set([...prev.keys(), ...target.keys()])];
+  const from = new Map(ids.map(id => [id, prev.get(id) || (() => { const t = target.get(id); return { a0: t.a1, a1: t.a1, color: t.color, pct: 0 }; })()]));
+  const to = new Map(ids.map(id => [id, target.get(id) || { ...from.get(id), a0: TAU, a1: TAU, pct: 0 }]));
+  const pt = (ang, r) => [R + r * Math.sin(ang), R - r * Math.cos(ang)];
+  const path = (a0, a1) => {
+    const sp = a1 - a0; if (sp <= 0.0005) return '';
+    if (sp >= TAU - 0.0005) return `M${R} ${R - R}A${R} ${R} 0 1 1 ${R - 0.01} ${R - R}Z`;
+    const [x0, y0] = pt(a0, R), [x1, y1] = pt(a1, R);
+    return `M${R} ${R}L${x0} ${y0}A${R} ${R} 0 ${sp > Math.PI ? 1 : 0} 1 ${x1} ${y1}Z`;
+  };
+  const draw = k => {
+    if (!tot) { el.innerHTML = `<svg viewBox="0 0 200 200"><circle class="empty" cx="100" cy="100" r="100"/><text x="100" y="100" style="fill:var(--mut);stroke:none;font-size:13px">لسه مفيش أقساط</text></svg>`; return; }
+    let p = '', t = '';
+    ids.forEach(id => {
+      const f = from.get(id), g = to.get(id), a0 = f.a0 + (g.a0 - f.a0) * k, a1 = f.a1 + (g.a1 - f.a1) * k, pc = f.pct + (g.pct - f.pct) * k;
+      const d = path(a0, a1); if (!d) return;
+      p += `<path d="${d}" fill="${g.color}"/>`;
+      if (a1 - a0 > 0.32) { const [lx, ly] = pt((a0 + a1) / 2, (a1 - a0) > TAU - 0.01 ? 0 : R * 0.62); t += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}">${Math.round(pc * 100)}%</text>`; }
+    });
+    el.innerHTML = `<svg viewBox="0 0 200 200">${p}${t}</svg>`;
+  };
+  el._prev = target;
+  cancelAnimationFrame(el._raf);
+  const t0 = performance.now(), D = prev.size || !tot ? 650 : 900;
+  const step = now => { const k = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - k, 3); draw(e); if (k < 1) el._raf = requestAnimationFrame(step); };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) draw(1); else el._raf = requestAnimationFrame(step);
 }
 
 // ---------- add curtain ----------
@@ -626,6 +656,9 @@ function renderRep() {
   $('#rTot').textContent = fmt(tot) + ' ج';
   $('#rCnt').textContent = list.length + ' قسط · ' + new Set(list.map(t => t.name.trim())).size + ' عميل';
   const ms = {}; list.forEach(t => { const m = methOf(t); (ms[m.id] ||= { m, v: 0, c: 0 }); ms[m.id].v += +t.amount; ms[m.id].c++; });
+  const rb = Object.values(ms).sort((x, y) => y.v - x.v);
+  pie($('#rPie'), rb.map(o => ({ id: o.m.id, v: o.v, color: o.m.color })));
+  $('#rLeg').innerHTML = rb.map(o => `<span><i style="background:${o.m.color}"></i>${esc(o.m.name)} <b class="num">${fmt(o.v)}</b></span>`).join('');
   $('#rMeth').innerHTML = bars(Object.values(ms).sort((x, y) => y.v - x.v).map(o => ({ l: o.m.emoji + ' ' + esc(o.m.name), v: o.v, c: o.c, col: o.m.color })), tot);
   // breakdown: year → months, month → days
   if (rMode === 'd') { $('#rBrkT').style.display = 'none'; $('#rBrk').innerHTML = ''; }
